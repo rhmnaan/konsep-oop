@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sistem E-Commerce OOP</title>
+<style>
+  :root{
+    --bg:#f4f6fb; --card:#ffffff; --text:#1c2333; --muted:#6b7488;
+    --line:#e2e6f0; --accent:#4f46e5; --accent-d:#4338ca;
+    --code-bg:#0f172a; --code-text:#e2e8f0; --ok:#16a34a; --err:#dc2626;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0b1020; --card:#151b2e; --text:#e6e9f2; --muted:#98a2b8;
+      --line:#262e47; --accent:#818cf8; --accent-d:#6366f1;
+      --code-bg:#070b16; --code-text:#e2e8f0;
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.5}
+  header{padding:28px 20px 8px;max-width:1200px;margin:0 auto}
+  header h1{margin:0;font-size:1.6rem}
+  header p{margin:4px 0 0;color:var(--muted);font-size:.95rem}
+  .wrap{max-width:1200px;margin:0 auto;padding:16px 20px 40px;display:grid;grid-template-columns:minmax(0,420px) minmax(0,1fr);gap:20px;align-items:start}
+  @media (max-width:900px){.wrap{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px}
+  .card h2{margin:0 0 14px;font-size:1.05rem}
+  fieldset{border:0;padding:0;margin:0 0 16px}
+  legend{font-weight:600;font-size:.9rem;color:var(--accent);margin-bottom:8px;padding:0}
+  label{display:block;font-size:.85rem;color:var(--muted);margin:10px 0 4px}
+  input,select{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--text);font-size:.95rem;font-family:inherit}
+  input:focus,select:focus{outline:2px solid var(--accent);outline-offset:-1px}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  button{width:100%;padding:12px;border:0;border-radius:10px;background:var(--accent);color:#fff;font-size:1rem;font-weight:600;cursor:pointer;margin-top:6px}
+  button:hover:not(:disabled){background:var(--accent-d)}
+  button:disabled{opacity:.55;cursor:not-allowed}
+  .btn-reset{background:transparent;color:var(--muted);border:1px solid var(--line);margin-top:8px}
+  .btn-reset:hover:not(:disabled){background:var(--bg)}
+  .outputs{display:grid;gap:20px}
+  .head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+  .head h2{margin:0}
+  .copy{width:auto;padding:6px 12px;font-size:.8rem;margin:0;background:transparent;color:var(--accent);border:1px solid var(--line)}
+  pre{margin:0;padding:16px;background:var(--code-bg);color:var(--code-text);border-radius:10px;overflow:auto;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.85rem;line-height:1.55;min-height:120px;max-height:460px;white-space:pre}
+  .status{font-size:.85rem;color:var(--muted);margin-bottom:12px}
+  .status.ok{color:var(--ok)} .status.err{color:var(--err)}
+  .error-box{background:rgba(220,38,38,.1);border:1px solid var(--err);color:var(--err);padding:12px 14px;border-radius:10px;font-size:.9rem;margin-bottom:14px;display:none}
+  footer{text-align:center;color:var(--muted);font-size:.8rem;padding-bottom:24px}
+</style>
+</head>
+<body>
+<header>
+  <h1>🛒 Sistem E-Commerce OOP</h1>
+  <p>Hierarki class, enkapsulasi, inheritance, polymorphism, abstract class, dan Design by Contract.</p>
+</header>
+
+<div class="wrap">
+  <!-- ======= INPUT ======= -->
+  <form class="card" id="form" autocomplete="off">
+    <h2>Input Data</h2>
+    <div class="status" id="status">Memuat Python (Pyodide)…</div>
+    <div class="error-box" id="errorBox"></div>
+
+    <fieldset>
+      <legend>Data Pembeli</legend>
+      <label for="nama">Nama pembeli</label>
+      <input id="nama" value="Budi Santoso" required>
+      <label for="email">Email pembeli</label>
+      <input id="email" type="email" value="budi@email.com" required>
+      <div class="row">
+        <div>
+          <label for="saldo">Saldo pembeli</label>
+          <input id="saldo" type="number" min="0" step="any" value="5000000" required>
+        </div>
+        <div>
+          <label for="jenisPembeli">Jenis pembeli</label>
+          <select id="jenisPembeli">
+            <option value="1">Reguler</option>
+            <option value="2">Member (diskon 5%)</option>
+            <option value="3" selected>Premium (diskon 10%)</option>
+          </select>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Data Produk</legend>
+      <div class="row">
+        <div>
+          <label for="kode">Kode produk</label>
+          <input id="kode" value="P001" required>
+        </div>
+        <div>
+          <label for="namaProduk">Nama produk</label>
+          <input id="namaProduk" value="Headphone Bluetooth" required>
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="harga">Harga produk</label>
+          <input id="harga" type="number" min="0" step="any" value="750000" required>
+        </div>
+        <div>
+          <label for="stok">Stok produk</label>
+          <input id="stok" type="number" min="0" step="1" value="10" required>
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="jenisProduk">Jenis produk</label>
+          <select id="jenisProduk">
+            <option value="1">Elektronik</option>
+            <option value="2">Pakaian</option>
+            <option value="3">Makanan</option>
+          </select>
+        </div>
+        <div>
+          <label for="atribut" id="atributLabel">Garansi</label>
+          <input id="atribut" value="1 Tahun" required>
+        </div>
+      </div>
+      <label for="jumlah">Jumlah yang dibeli</label>
+      <input id="jumlah" type="number" min="1" step="1" value="2" required>
+    </fieldset>
+
+    <fieldset>
+      <legend>Metode Pembayaran</legend>
+      <select id="metode">
+        <option value="1">Transfer</option>
+        <option value="2">E-Wallet</option>
+        <option value="3">COD</option>
+      </select>
+    </fieldset>
+
+    <button type="submit" id="btnRun" disabled>Proses Pesanan</button>
+    <button type="button" class="btn-reset" id="btnReset">Reset Output</button>
+  </form>
+
+  <!-- ======= OUTPUT ======= -->
+  <div class="outputs">
+    <div class="card">
+      <div class="head">
+        <h2>Output 1 — Hasil Program</h2>
+        <button type="button" class="copy" data-target="outText">Salin</button>
+      </div>
+      <pre id="outText">Belum ada output. Isi form lalu klik “Proses Pesanan”.</pre>
+    </div>
+
+    <div class="card">
+      <div class="head">
+        <h2>Output 2 — JSON</h2>
+        <button type="button" class="copy" data-target="outJson">Salin</button>
+      </div>
+      <pre id="outJson">Belum ada output.</pre>
+    </div>
+  </div>
+</div>
+
+<footer>Dibuat dengan Python OOP · dijalankan lewat Pyodide</footer>
+
+<!-- ======= KODE PYTHON (dari inherv2.py) ======= -->
+<script type="text/python" id="pycode">
+import json
+import io
+from contextlib import redirect_stdout
+from abc import ABC, abstractmethod
+
+class Pengguna(ABC):
+    def __init__(self,nama,email):
+        self._nama=nama
+        self._email=email
+    @abstractmethod
+    def tampilkan_role(self):
+        pass
+
+class Pembeli(Pengguna):
+    def __init__(self,nama,email,saldo):
+        super().__init__(nama,email)
+        assert saldo>=0,"Saldo tidak boleh negatif"
+        self.__saldo=saldo
+    def tampilkan_role(self):
+        return "Pembeli"
+    def get_saldo(self):
+        return self.__saldo
+    def kurangi_saldo(self,jumlah):
+        assert jumlah>0,"Jumlah pembayaran harus lebih dari 0"
+        assert jumlah<=self.__saldo,"Saldo tidak mencukupi"
+        self.__saldo-=jumlah
+        assert self.__saldo>=0,"Saldo tidak boleh negatif"
+
+class Penjual(Pengguna):
+    def __init__(self,nama,email,nama_toko):
+        super().__init__(nama,email)
+        self.__nama_toko=nama_toko
+    def tampilkan_role(self):
+        return "Penjual"
+    def get_nama_toko(self):
+        return self.__nama_toko
+
+class PembeliMember(Pembeli):
+    def tampilkan_role(self):
+        return "Pembeli Member"
+    def hitung_diskon(self,total):
+        return total*0.05
+
+class PembeliPremium(Pembeli):
+    def tampilkan_role(self):
+        return "Pembeli Premium"
+    def hitung_diskon(self,total):
+        return total*0.10
+
+class Produk(ABC):
+    def __init__(self,kode,nama,harga,stok):
+        assert harga>0,"Harga harus lebih dari 0"
+        assert stok>=0,"Stok tidak boleh negatif"
+        self._kode=kode
+        self._nama=nama
+        self._harga=harga
+        self._stok=stok
+    @abstractmethod
+    def tampilkan_jenis(self):
+        pass
+    @abstractmethod
+    def hitung_harga(self,jumlah):
+        pass
+    def kurangi_stok(self,jumlah):
+        assert jumlah>0,"Jumlah harus lebih dari 0"
+        assert jumlah<=self._stok,"Stok tidak mencukupi"
+        self._stok-=jumlah
+    def get_data(self):
+        return {
+            "kode":self._kode,
+            "nama":self._nama,
+            "harga":self._harga,
+            "stok":self._stok
+        }
+
+class ProdukElektronik(Produk):
+    def __init__(self,kode,nama,harga,stok,garansi):
+        super().__init__(kode,nama,harga,stok)
+        self.__garansi=garansi
+    def tampilkan_jenis(self):
+        return "Elektronik"
+    def hitung_harga(self,jumlah):
+        return self._harga*jumlah
+    def get_garansi(self):
+        return self.__garansi
+
+class ProdukPakaian(Produk):
+    def __init__(self,kode,nama,harga,stok,ukuran):
+        super().__init__(kode,nama,harga,stok)
+        self.__ukuran=ukuran
+    def tampilkan_jenis(self):
+        return "Pakaian"
+    def hitung_harga(self,jumlah):
+        return self._harga*jumlah
+    def get_ukuran(self):
+        return self.__ukuran
+
+class ProdukMakanan(Produk):
+    def __init__(self,kode,nama,harga,stok,kadaluarsa):
+        super().__init__(kode,nama,harga,stok)
+        self.__kadaluarsa=kadaluarsa
+    def tampilkan_jenis(self):
+        return "Makanan"
+    def hitung_harga(self,jumlah):
+        return self._harga*jumlah
+    def get_kadaluarsa(self):
+        return self.__kadaluarsa
+
+class Keranjang:
+    def __init__(self):
+        self.__items=[]
+    def tambah_produk(self,produk,jumlah=1):
+        assert jumlah>0,"Jumlah harus lebih dari 0"
+        produk.kurangi_stok(jumlah)
+        self.__items.append({
+            "produk":produk,
+            "jumlah":jumlah,
+            "subtotal":produk.hitung_harga(jumlah)
+        })
+    def hitung_total(self):
+        return sum(item["subtotal"] for item in self.__items)
+    def get_items(self):
+        return self.__items
+
+class Pesanan:
+    nomor=1000
+    def __init__(self,pembeli,keranjang):
+        self.__nomor=Pesanan.nomor
+        Pesanan.nomor+=1
+        self.__pembeli=pembeli
+        self.__keranjang=keranjang
+        self.__status="Menunggu Pembayaran"
+    def hitung_total(self):
+        return self.__keranjang.hitung_total()
+    def hitung_diskon(self):
+        if hasattr(self.__pembeli,"hitung_diskon"):
+            return self.__pembeli.hitung_diskon(self.hitung_total())
+        return 0
+    def hitung_total_bayar(self):
+        return self.hitung_total()-self.hitung_diskon()
+    def ubah_status(self,status):
+        self.__status=status
+    def get_data(self):
+        return {
+            "nomor_pesanan":self.__nomor,
+            "total":self.hitung_total(),
+            "diskon":self.hitung_diskon(),
+            "total_bayar":self.hitung_total_bayar(),
+            "status":self.__status
+        }
+
+class Pembayaran(ABC):
+    @abstractmethod
+    def bayar(self,jumlah):
+        pass
+
+class Transfer(Pembayaran):
+    def bayar(self,jumlah):
+        assert jumlah>0,"Jumlah pembayaran harus lebih dari 0"
+        return "Pembayaran melalui Transfer berhasil"
+
+class EWallet(Pembayaran):
+    def bayar(self,jumlah):
+        assert jumlah>0,"Jumlah pembayaran harus lebih dari 0"
+        return "Pembayaran melalui E-Wallet berhasil"
+
+class COD(Pembayaran):
+    def bayar(self,jumlah):
+        assert jumlah>0,"Jumlah pembayaran harus lebih dari 0"
+        return "Pembayaran melalui COD berhasil"
+
+
+def rp(x):
+    return "Rp " + format(x, ",.0f").replace(",", ".")
+
+
+def proses(nama,email,saldo,pilihan_pembeli,kode,nama_produk,harga,stok,pilihan_produk,atribut,jumlah,pilihan_pembayaran):
+    """Pengganti main(): menerima data dari form, bukan input()."""
+    print("=== SISTEM E-COMMERCE ===")
+    if pilihan_pembeli=="2":
+        pembeli=PembeliMember(nama,email,saldo)
+    elif pilihan_pembeli=="3":
+        pembeli=PembeliPremium(nama,email,saldo)
+    else:
+        pembeli=Pembeli(nama,email,saldo)
+    print("Pembeli      :",pembeli._nama,"(",pembeli.tampilkan_role(),")")
+    print("Email        :",pembeli._email)
+    print("Saldo awal   :",rp(saldo))
+
+    if pilihan_produk=="1":
+        produk=ProdukElektronik(kode,nama_produk,harga,stok,atribut)
+    elif pilihan_produk=="2":
+        produk=ProdukPakaian(kode,nama_produk,harga,stok,atribut)
+    else:
+        produk=ProdukMakanan(kode,nama_produk,harga,stok,atribut)
+    print("\n=== DATA PRODUK ===")
+    print("Produk       :",produk._nama,"[",produk._kode,"] -",produk.tampilkan_jenis())
+    print("Harga satuan :",rp(produk._harga))
+
+    keranjang=Keranjang()
+    keranjang.tambah_produk(produk,jumlah)
+    pesanan=Pesanan(pembeli,keranjang)
+    total_bayar=pesanan.hitung_total_bayar()
+    print("\n=== KERANJANG & PESANAN ===")
+    print("Jumlah beli  :",jumlah)
+    print("Total        :",rp(pesanan.hitung_total()))
+    print("Diskon       :",rp(pesanan.hitung_diskon()))
+    print("Total bayar  :",rp(total_bayar))
+
+    if pilihan_pembayaran=="1":
+        pembayaran=Transfer()
+        pesan=pembayaran.bayar(total_bayar)
+        pembeli.kurangi_saldo(total_bayar)
+    elif pilihan_pembayaran=="2":
+        pembayaran=EWallet()
+        pesan=pembayaran.bayar(total_bayar)
+        pembeli.kurangi_saldo(total_bayar)
+    else:
+        pembayaran=COD()
+        pesan=pembayaran.bayar(total_bayar)
+    pesanan.ubah_status("Pembayaran Berhasil")
+    print("\n=== PEMBAYARAN ===")
+    print(pesan)
+    print("Status       :",pesanan.get_data()["status"])
+    print("Saldo akhir  :",rp(pembeli.get_saldo()))
+    print("Stok akhir   :",produk._stok)
+
+    output={
+        "aplikasi":"E-Commerce",
+        "jumlah_class":15,
+        "pembeli":{
+            "nama":pembeli._nama,
+            "email":pembeli._email,
+            "role":pembeli.tampilkan_role(),
+            "saldo_akhir":pembeli.get_saldo()
+        },
+        "produk":{
+            "kode":produk._kode,
+            "nama":produk._nama,
+            "jenis":produk.tampilkan_jenis(),
+            "harga":produk._harga,
+            "jumlah":jumlah,
+            "stok_akhir":produk._stok
+        },
+        "pesanan":pesanan.get_data(),
+        "pembayaran":{
+            "metode":pembayaran.__class__.__name__,
+            "status":pesan
+        },
+        "konsep_oop":{
+            "class_hierarchy":True,
+            "encapsulation":True,
+            "instance":True,
+            "constructor":True,
+            "inheritance":True,
+            "overloading":True,
+            "polymorphism":True,
+            "abstract_class":True
+        },
+        "design_by_contract":{
+            "precondition":True,
+            "postcondition":True,
+            "invariant":True
+        }
+    }
+    return output
+
+
+def jalankan(nama,email,saldo,pilihan_pembeli,kode,nama_produk,harga,stok,pilihan_produk,atribut,jumlah,pilihan_pembayaran):
+    """Dipanggil dari JavaScript. Mengembalikan JSON string berisi teks hasil & JSON."""
+    buf=io.StringIO()
+    try:
+        with redirect_stdout(buf):
+            data=proses(
+                str(nama),str(email),float(saldo),str(pilihan_pembeli),
+                str(kode),str(nama_produk),float(harga),int(stok),
+                str(pilihan_produk),str(atribut),int(jumlah),str(pilihan_pembayaran)
+            )
+        return json.dumps({
+            "ok":True,
+            "text":buf.getvalue().rstrip(),
+            "json":json.dumps(data,indent=4,ensure_ascii=False)
+        })
+    except AssertionError as e:
+        return json.dumps({"ok":False,"error":"Assertion gagal (Design by Contract): "+str(e),"text":buf.getvalue().rstrip()})
+    except Exception as e:
+        return json.dumps({"ok":False,"error":type(e).__name__+": "+str(e),"text":buf.getvalue().rstrip()})
+</script>
+
+<script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const statusEl = $("status"), btnRun = $("btnRun"), errBox = $("errorBox");
+  const outText = $("outText"), outJson = $("outJson");
+  let pyodide = null, jalankan = null;
+
+  const labels = {"1":["Garansi","1 Tahun"],"2":["Ukuran","L"],"3":["Tanggal kadaluarsa","2026-12-31"]};
+  $("jenisProduk").addEventListener("change", e => {
+    const [label, val] = labels[e.target.value];
+    $("atributLabel").textContent = label;
+    $("atribut").value = val;
+  });
+
+  async function init(){
+    try{
+      pyodide = await loadPyodide();
+      await pyodide.runPythonAsync($("pycode").textContent);
+      jalankan = pyodide.globals.get("jalankan");
+      statusEl.textContent = "✓ Python siap digunakan";
+      statusEl.className = "status ok";
+      btnRun.disabled = false;
+    }catch(e){
+      statusEl.textContent = "Gagal memuat Python: " + e.message;
+      statusEl.className = "status err";
+    }
+  }
+
+  $("form").addEventListener("submit", e => {
+    e.preventDefault();
+    if(!jalankan) return;
+    errBox.style.display = "none";
+    const raw = jalankan(
+      $("nama").value, $("email").value, $("saldo").value, $("jenisPembeli").value,
+      $("kode").value, $("namaProduk").value, $("harga").value, $("stok").value,
+      $("jenisProduk").value, $("atribut").value, $("jumlah").value, $("metode").value
+    );
+    const res = JSON.parse(raw);
+    if(res.ok){
+      outText.textContent = res.text;
+      outJson.textContent = res.json;
+    }else{
+      errBox.textContent = "⚠ " + res.error;
+      errBox.style.display = "block";
+      outText.textContent = res.text || "Proses dihentikan karena ada error.";
+      outJson.textContent = "Tidak ada JSON (proses gagal).";
+    }
+  });
+
+  $("btnReset").addEventListener("click", () => {
+    outText.textContent = "Belum ada output. Isi form lalu klik “Proses Pesanan”.";
+    outJson.textContent = "Belum ada output.";
+    errBox.style.display = "none";
+  });
+
+  document.querySelectorAll(".copy").forEach(b => {
+    b.addEventListener("click", async () => {
+      try{
+        await navigator.clipboard.writeText($(b.dataset.target).textContent);
+        const old = b.textContent; b.textContent = "Tersalin ✓";
+        setTimeout(() => b.textContent = old, 1200);
+      }catch(_){}
+    });
+  });
+
+  init();
+})();
+</script>
+</body>
+</html>
